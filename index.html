@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title></title>
+	<meta charset="utf-8">
+</head>
+<body>
+	<div>
+	<!-- width和height一样-->
+    <canvas id="clock" width="400px" height="400px"></canvas>
+</div>
+</body>
+</html>
+<script>
+	//获取画布
+
+var doc = document.getElementById("clock");
+
+//所有的操作都在上下文中，所以要获取上下文,是2d的
+
+    //alert(dom);
+var ctx =doc.getContext("2d");
+var width = ctx.canvas.width;
+var height= ctx.canvas.height;
+var k = width/200;
+var r = width/2;//写圆的半径
+//重新映射画布上的原点，原始的原点是canvas中的左上角,下面语句是把(r,r)当成原点
+ctx.translate(r,r);
+function  drawBackground(){
+    ctx.save();
+    ctx.strokeStyle="black";
+    ctx.fillStyle="black"
+    //重置当前路径，如果不重置，则会从上次话的路径开始
+    ctx.beginPath();
+    //设置划线的宽度
+    ctx.lineWidth=10*k;
+    //参数依次是 前两个圆心的 x,y坐标。圆的半径，起始角，终止角（都是以弧度来计算的），顺时针还是逆时针（false顺，true逆）
+    ctx.arc(0,0,r-5*k,0,2*Math.PI,false);
+    //stroke() 方法会实际地绘制出方法定义的路径。默认颜色是黑色。
+    ctx.stroke();
+
+//    画数字图
+    var hourNumbers =[3,4,5,6,7,8,9,10,11,12,1,2];
+    //字体样式和大小
+    ctx.font=18*k+"px Arial";
+    //字体的水平位置，默认是居左
+    ctx.textAlign="center";
+    //字体的垂直居中
+    ctx.textBaseline ="middle";
+    hourNumbers.forEach(function(number,i){
+        //先是计算所要画的位置
+        var rad = 2*Math.PI/12*i;
+        var x = Math.cos(rad)*(r-30*k);
+        var y = Math.sin(rad)*(r-30*k);
+        //用来画文本
+        ctx.fillText(number,x,y);
+    });
+    ctx.lineWidth=1;
+    for(var i=0;i<60;i++){
+        var rad =2*Math.PI/60*i;
+        var x = Math.cos(rad)*(r-18*k);
+        var y = Math.sin(rad)*(r-18*k);
+    //    通过画实心圆来画点
+        ctx.beginPath();
+        if(i%5==0){
+            ctx.fillStyle="black";
+            ctx.arc(x,y,2*k,0,2*Math.PI,false);
+        }else{
+
+            ctx.fillStyle="#ccc";
+            ctx.arc(x,y,2*k,0,2*Math.PI,false);
+        }
+        ctx.fill();
+        ctx.strokeStyle="white"
+        ctx.stroke();
+    }
+
+}
+function  drawHour(hour,minute){
+    ctx.save();
+    ctx.strokeStyle="black";
+    ctx.beginPath();
+    var rad = 2*Math.PI/12*hour;
+    var mrad = 2*Math.PI/12/60 *minute;
+    ctx.rotate(rad+mrad);
+    ctx.lineWidth=6*k;
+    ctx.lineCap="round";
+    //移动画直线的起始点位置相对原点的移动
+    ctx.moveTo(0,10*k);
+    //目标位置
+    ctx.lineTo(0,-r/2);
+    ctx.stroke();
+    ctx.restore();
+}
+function  drawMinute(minute){
+    ctx.save();
+    ctx.beginPath();
+    var rad = 2*Math.PI/60*minute;
+    ctx.rotate(rad);
+    ctx.lineWidth=3*k;
+    ctx.lineCap="round";
+    ctx.moveTo(0,10*k);
+    ctx.lineTo(0,-r+30*k);
+    ctx.strokeStyle="black";
+    ctx.stroke();
+    ctx.restore();
+}
+function  drawSecond(second){
+    ctx.save();
+    ctx.beginPath();
+    var rad = 2*Math.PI/60*second;
+    ctx.rotate(rad);
+    ctx.moveTo(-2*k,20*k);
+    ctx.lineTo(2*k,20*k);
+    ctx.lineTo(1*k,-r+18*k);
+    ctx.lineTo(-1*k,-r+18*k);
+    ctx.lineCap="round";
+    ctx.moveTo(0,10*k);
+    ctx.lineTo(0,-r+30*k);
+    ctx.fillStyle="orange";
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+}
+function drawDot(){
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle="white";
+    ctx.arc(0,0,3*k,0,2*Math.PI,false);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+}
+function show(){
+    ctx.clearRect(-r,-r,width,height);
+    var now = new Date();
+    var houre = now.getHours();
+    var minute = now.getMinutes();
+    var second = now.getSeconds();
+    drawBackground();
+    drawHour(houre,minute);
+    drawMinute(minute);
+    drawSecond(second);
+    drawDot();
+    ctx.restore();
+
+}
+show();
+setInterval(show,1000);
+</script>
